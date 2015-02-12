@@ -12,12 +12,14 @@ public class ClientChat {
 	private ObjectInputStream in;
 	private ObjectOutputStream out;
 	private String login;
+	private String pass;
 	private String status;
 	private BufferedReader bufReader;
 
 
 	public ClientChat() {
 		login = "";
+		pass = "";
 		status = "work";
 
 		try {
@@ -54,7 +56,7 @@ public class ClientChat {
 			InputStreamReader(System.in));
 
 		try {
-				// Читаем логин
+				// Reading login
 				while(true) {
 					System.out.println("Enter your login:");
 					login = input.readLine();
@@ -64,15 +66,31 @@ public class ClientChat {
 						break;
 					}
 				}
+				// Reading password
+				while(true) {
+					System.out.println("Enter your password:");
+					pass = input.readLine();
+					if(pass != null) {
+						out.writeUTF(pass);
+						out.flush();
+						break;
+					}
+				}
 
 				while( (msg = input.readLine()) != null ) {
 					if(msg.equalsIgnoreCase("change status")) {
 						this.setStatus();
 					} else {
-						Message message = new Message(login, msg, status);
-						out.writeObject(message);
-					}
+						Message message = new Message(login, msg, status, this.socket.getRemoteSocketAddress().toString());
 
+						if(msg.equalsIgnoreCase("quit")) {
+							System.out.println("disconect");
+							out.writeObject(message);
+							break;
+						} else {
+							out.writeObject(message);
+						}
+					}
 				}
 
 		} catch(IOException ex) { ex.printStackTrace(); }
@@ -85,7 +103,23 @@ public class ClientChat {
 
 		try {
 				while((mess = (Message) in.readObject()) != null) {
+
+					if(mess.getMessage().equals("authorization false")) {
+						System.out.println("Incorrect login or password.");
+						in.close();
+						out.close();
+						socket.close();
+						break;
+
+					} if(mess.getMessage().equals("exit")) {
+						in.close();
+						out.close();
+						socket.close();
+						break;
+
+					} else {
 						System.out.println(mess.getLogin() +" ["+ mess.getDate() +"] "+"(status:" + mess.getStatus()+"): "+mess.getMessage());
+					}
 				}
 
 		} catch (ClassNotFoundException ex) {

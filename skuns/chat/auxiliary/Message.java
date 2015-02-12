@@ -38,7 +38,7 @@ public class Message implements Serializable {
 	}
 
 	public String getIpAdress() {
-		return getIpAdress;
+		return ip_adress;
 	}
 
 	public String getDate() {
