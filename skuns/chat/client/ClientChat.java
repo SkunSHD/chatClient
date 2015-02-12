@@ -104,14 +104,14 @@ public class ClientChat {
 		try {
 				while((mess = (Message) in.readObject()) != null) {
 
-					if(mess.getMessage().equals("authorization false")) {
+					if(mess.getMessage().equals("error authorization")) {
 						System.out.println("Incorrect login or password.");
 						in.close();
 						out.close();
 						socket.close();
-						break;
+						System.exit(0);
 
-					} if(mess.getMessage().equals("exit")) {
+					} else if(mess.getMessage().equals("exit")) {
 						in.close();
 						out.close();
 						socket.close();
